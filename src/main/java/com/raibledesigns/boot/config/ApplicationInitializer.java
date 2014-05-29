@@ -1,5 +1,8 @@
 package com.raibledesigns.boot.config;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.boot.SpringApplication;
@@ -10,10 +13,13 @@ import org.springframework.boot.context.web.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 @Configuration
 @EnableAutoConfiguration
-@ComponentScan
+@ComponentScan("com.raibledesigns.boot.service")
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApplicationInitializer extends SpringBootServletInitializer {
 
     @Bean
@@ -26,6 +32,13 @@ public class ApplicationInitializer extends SpringBootServletInitializer {
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(ApplicationInitializer.class);
+    }
+    
+    @Override
+	public void onStartup(ServletContext servletContext) throws ServletException {
+    	super.onStartup(servletContext);
+    	// The following line is required to avoid having jersey-spring3 registering it's own Spring root context.
+    	servletContext.setInitParameter("contextConfigLocation", "please.do.not.reload.root.context.jersey2");
     }
 
     public static void main(String[] args) {
